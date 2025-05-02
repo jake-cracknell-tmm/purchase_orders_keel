@@ -1,0 +1,21 @@
+model Shipment {
+    fields {
+        salesOrderItems SalesOrderItem[]
+        invoice Invoice
+    }
+}
+
+model Invoice {
+    fields {
+        customer Customer
+        shipments Shipment[]
+        quickBookInvoiceId ID
+        invoiceStatus InvoiceStatus
+    }
+}
+
+enum InvoiceStatus {
+    New
+    PushedToQb
+    Closed
+}

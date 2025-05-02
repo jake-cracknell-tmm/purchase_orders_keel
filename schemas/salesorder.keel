@@ -1,0 +1,102 @@
+model Customer {
+    fields {
+        name Text
+        email Text
+        address Text
+        quickBookCustomerId ID?
+        salesOrders SalesOrder[]
+        invoices Invoice[]
+    }
+
+    actions {
+        create createCustomer() with (name, email, address, quickBookCustomerId?)
+        list listCustomer()
+        get getCustomer(id)
+        update updateCustomer(id)
+        delete deleteCustomer(id)
+    }
+
+    @permission(
+        roles: [Admin],
+        actions: [create, list, get, update, delete]
+    )
+
+    @permission(
+        roles: [Staff],
+        actions: [list, get]
+    )
+}
+
+model SalesOrder {
+    fields {
+        customer Customer
+        salesOrderItems SalesOrderItem[]
+        shopifyId ID?
+        status SalesOrderStatus @default(SalesOrderStatus.New)
+        cancellationReason Text?
+        cancelledAt Timestamp?
+        currency Text?
+        totalPrice Number?
+        //@computed(salesOrderItems.totalPrice)
+    }
+
+    actions {
+        create createSalesOrder() with (
+            customer.id,
+            salesOrderItems.productVariant.id,
+            salesOrderItems.quantity,
+        )
+        list listSalesOrder()
+        get getSalesOrder(id)
+        update updateSalesOrder(id)
+        update paidSalesOrder(id)
+        //@function
+        //1. set as paid
+        //2. mark inventory as reserved
+        //3. generate invoice
+        delete deleteSalesOrder(id)
+    }
+
+    @permission(
+        //roles: [Admin],
+        expression: true,
+        actions: [create, list, get, update, delete]
+    )
+}
+
+model SalesOrderItem {
+    fields {
+        salesOrder SalesOrder
+        shipment Shipment?
+        productVariant ProductVariant
+        quantity Number
+        totalPrice Decimal?
+        //@computed(salesOrderItem.productVariant.price * salesOrderItem.quantity)
+    }
+
+    actions {
+        create createSalesOrderItem() with (
+            salesOrder.id,
+            productVariant.id,
+            quantity,
+        )
+        update updateSalesOrderItem(id)
+        list listSalesOrderItem()
+        get getSalesOrderItem(id)
+        delete deleteSalesOrderItem(id)
+    }
+
+    @permission(
+        //roles: [Admin],
+        expression: true,
+        actions: [create, list, get, update, delete]
+    )
+}
+
+enum SalesOrderStatus {
+    New
+    Paid
+    Picked
+    Shipped
+    Cancelled
+}

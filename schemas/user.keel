@@ -1,0 +1,53 @@
+// Visit https://docs.keel.so/ for documentation on how to get started
+model User {
+    fields {
+        identity Identity @unique
+        firstName Text
+        lastName Text
+        email Text @unique
+        purchaseOrdersCreated PurchaseOrder[]
+        purchaseOrdersApproved PurchaseOrder[]
+    }
+
+    actions {
+        create createUser() with (firstName, lastName, email) {
+            @set(user.identity = ctx.identity)
+            @permission(expression: ctx.isAuthenticated == true)
+        }
+        update updateUser(id) {
+            @permission(expression: user.identity == ctx.identity)
+        }
+        get getUser(id) {
+            @permission(expression: user.identity == ctx.identity)
+        }
+        list listUser()
+        delete deleteUser(id)
+    }
+
+    @permission(
+        roles: [Admin],
+        actions: [create, update,get, list, delete]
+    )
+}
+
+role Admin {
+    domains {
+        "themodernmilkman.co.uk"
+    }
+
+    emails {
+        "benoit@keel.xyz"
+        "tom@keel.xyz"
+        "michael.shindler@themodernmilkman.co.uk"
+        "alvaro.guimaraes@themodernmilkman.co.uk"
+        "richard.jones@themodernmilkman.co.uk"
+        "george.harnwell@themodernmilkman.co.uk"
+    }
+}
+
+role Staff {
+    domains {
+        "keel.xyz"
+        "themodernmilkman.co.uk"
+    }
+}

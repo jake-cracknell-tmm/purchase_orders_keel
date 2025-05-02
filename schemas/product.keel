@@ -1,0 +1,102 @@
+model Supplier {
+    fields {
+        name Text
+        address Text
+        email Text
+        products Product[]
+    }
+
+    actions {
+        create createSupplier() with (name, address, email)
+        get getSupplier(id)
+        list listSupplier()
+        delete deleteSupplier(id)
+    }
+
+    // See role definitions in user.keel
+    @permission(
+        roles: [Admin],
+        actions: [create, delete, get, list]
+    )
+
+    @permission(
+        roles: [Staff],
+        actions: [get, list]
+    )
+}
+
+model Product {
+    fields {
+        name Text
+        description Text?
+        supplier Supplier?
+        productVariants ProductVariant[]
+    }
+
+    actions {
+        create createProduct() with (name, description?, supplier.id?)
+        list listProduct()
+        get getProduct(id)
+        update updateProduct(id)
+        delete deleteProduct(id)
+    }
+
+    @permission(
+        roles: [Admin],
+        actions: [create, list, get, update, delete]
+    )
+
+    @permission(
+        roles: [Staff],
+        actions: [get, list, update]
+    )
+}
+
+model ProductVariant {
+    fields {
+        product Product
+        shopifyId ID?
+        quickBookItemId ID?
+        size Decimal
+        sizeUnit ProductVariantSizeUnit
+        price Decimal
+        sku Text @unique
+        purchaseOrderLineItems PurchaseOrderLineItem[]
+        inventoryLevels InventoryLevel[]
+    }
+
+    actions {
+        create createProductVariant() with (
+            product.id,
+            shopifyId?,
+            quickBookItemId?,
+            size,
+            sizeUnit,
+            sku,
+            price,
+        )
+        list listProductVariant()
+        list listProductProductVariant(product.id)
+        get getProductVariant(id)
+        update updateProductVariant(id)
+        delete deleteProductVariant(id)
+    }
+
+    @permission(
+        roles: [Admin],
+        actions: [create, list, get, update, delete]
+    )
+
+    @permission(
+        roles: [Staff],
+        actions: [get, list, update]
+    )
+}
+
+enum ProductVariantSizeUnit {
+    Litres
+    Millilitres
+    Grams
+    Kilograms
+    Milligrams
+}
