@@ -3,32 +3,19 @@ model PurchaseOrder {
         purchaseOrderLineitems PurchaseOrderLineItem[]
         status PurchaseOrderStatus @default(PurchaseOrderStatus.New)
         createdBy User @relation(purchaseOrdersCreated)
-        approvedBy User? @relation(purchaseOrdersApproved)
     }
 
     actions {
         create createPurchaseOrder() with (
-            purchaseOrderLineitems.productVariant.id,
+            purchaseOrderLineitems.product.id,
             purchaseOrderLineitems.quantity,
             purchaseOrderLineitems.unitCost,
         ) {
             @set(purchaseOrder.createdBy = ctx.identity.user)
         }
-        // update updatePurchaseOrder(id) with (
-        //     purchaseOrderLineitems.productVariant.id,
-        //     purchaseOrderLineitems.quantity,
-        //     purchaseOrderLineitems.unitCost,
-        // ) {
-        //     @permission(expression: ctx.identity.id == purchaseOrder.createdBy.id)
-        // }
-        update approvePurchaseOrder(id) {
-            @set(purchaseOrder.status = PurchaseOrderStatus.Approved)
-            @set(purchaseOrder.approvedBy = ctx.identity.user)
-            //Accomodates for PO approval flow. Only Admin roles can approve POs.
-        }
+
         list listPurchaseOrder()
         list listPurchaseOrderByCreator(createdBy.id)
-        list listPurchaseOrderByApprover(approvedBy.id)
         get getPurchaseOrder(id)
         delete deletePurchaseOrder(id)
     }
@@ -47,7 +34,7 @@ model PurchaseOrder {
 model PurchaseOrderLineItem {
     fields {
         purchaseOrder PurchaseOrder
-        productVariant ProductVariant
+        product Product
         quantity Number
         unitCost Decimal
     }
@@ -55,16 +42,16 @@ model PurchaseOrderLineItem {
     actions {
         create createPurchaseOrderLineItem() with (
             purchaseOrder.id,
-            productVariant.id,
+            product.id,
             quantity,
             unitCost,
         )
         update updatePurchaseOrderLineItem(id)
         get getPurchaseOrderLineItem(id)
-        list listPurchaseOrderLineItemByProductVariant(productVariant.id)
+        list listPurchaseOrderLineItemByProductVariant(product.id)
         list listPurchaseOrderLineItem()
         list listPurchaseOrderLineItemByPurchaseOrder(purchaseOrder.id) {
-            @embed(productVariant)
+            @embed(product)
         }
         delete deletePurchaseOrderLineItem(id)
     }
@@ -77,5 +64,6 @@ model PurchaseOrderLineItem {
 
 enum PurchaseOrderStatus {
     New
-    Approved
+    Submitted
+    Completed
 }

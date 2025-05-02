@@ -1,0 +1,26 @@
+model Supplier {
+    fields {
+        name Text
+        address Text
+        email Text
+        products Product[]
+    }
+
+    actions {
+        create createSupplier() with (name, address, email)
+        get getSupplier(id)
+        list listSupplier()
+        delete deleteSupplier(id)
+    }
+
+    // See role definitions in user.keel
+    @permission(
+        roles: [Admin],
+        actions: [create, delete, get, list]
+    )
+
+    @permission(
+        roles: [Staff],
+        actions: [get, list]
+    )
+}

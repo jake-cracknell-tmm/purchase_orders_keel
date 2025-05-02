@@ -6,7 +6,6 @@ model User {
         lastName Text
         email Text @unique
         purchaseOrdersCreated PurchaseOrder[]
-        purchaseOrdersApproved PurchaseOrder[]
     }
 
     actions {
